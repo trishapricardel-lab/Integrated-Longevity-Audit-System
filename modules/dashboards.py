@@ -124,7 +124,7 @@ def personnel_status_panel(merged_df, soi_df, orders_df):
             (~merged_df["Serial Number"].isin(orders_df["Serial Number"]))
         ]
 
-        st.subheader("⚠ Personnel Receiving Longevity Pay WITHOUT Official Order")
+        st.subheader("LP Without Order")
 
         st.metric(
             "Cases Detected",
@@ -147,7 +147,7 @@ def personnel_status_panel(merged_df, soi_df, orders_df):
             ~eligible_df["Serial Number"].isin(orders_df["Serial Number"])
         ]
 
-        st.subheader("⚠ Personnel Eligible but NO Longevity Order Issued")
+        st.subheader("Personnel Eligible but NO LP Order")
 
         st.metric(
             "Personnel Eligible Without Order",
@@ -168,7 +168,7 @@ def personnel_status_panel(merged_df, soi_df, orders_df):
             ~orders_df["Serial Number"].isin(merged_df["Serial Number"])
         ]
 
-        st.subheader("⚠ Orders Issued but Payroll NOT Updated")
+        st.subheader("Orders Issued but Payroll NOT Updated")
 
         st.metric(
             "Cases Detected",
