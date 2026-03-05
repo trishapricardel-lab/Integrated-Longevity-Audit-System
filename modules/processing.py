@@ -90,7 +90,7 @@ def merge_datasets(soi_df, payroll_df):
 
     merged_df = pd.merge(
         payroll_df,
-        soi_df,
+        soi_df[["Serial Number", "Rank", "Name", "Date of Entry"]],
         on="Serial Number",
         how="inner"
     )
