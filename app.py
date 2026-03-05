@@ -131,8 +131,9 @@ if soi_file is not None and payroll_files:
 # DASHBOARDS
 # ============================
 
-irregularity_summary(merged_df, soi_df, orders_df)
-
+if merged_df is not None:
+    irregularity_summary(merged_df, soi_df, orders_df)
+    
 command_dashboard(summary_df)
 
 rank_summary(merged_df)
