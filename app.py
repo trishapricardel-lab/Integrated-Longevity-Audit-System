@@ -670,40 +670,40 @@ if soi_file is not None and payroll_files:
             else:
                 st.success("All issued orders reflected in payroll.")
 
-# ============================
-# CORRECT LP COMPUTATION
-# ============================
+        # ============================
+        # CORRECT LP COMPUTATION
+        # ============================
 
-merged_df["Years_of_Service"] = (
-    (merged_df["Payroll_Date"] - merged_df["Date of Entry"]).dt.days / 365.25
-)
+        merged_df["Years_of_Service"] = (
+            (merged_df["Payroll_Date"] - merged_df["Date of Entry"]).dt.days / 365.25
+        )
 
-merged_df["LP_Count"] = merged_df["Years_of_Service"].apply(
-    lambda x: min(math.floor(x / 5), 5)
-)
+        merged_df["LP_Count"] = merged_df["Years_of_Service"].apply(
+            lambda x: min(math.floor(x / 5), 5)
+        )
 
-def compute_correct_lp(base_salary, lp_count):
+        def compute_correct_lp(base_salary, lp_count):
 
-    if lp_count <= 0:
-        return 0
-    elif lp_count == 5:
-        return base_salary * 0.50
-    else:
-        return base_salary * (1.1 ** lp_count - 1)
+            if lp_count <= 0:
+                return 0
+            elif lp_count == 5:
+                return base_salary * 0.50
+            else:
+                return base_salary * (1.1 ** lp_count - 1)
 
-merged_df["Correct_Long_Pay"] = merged_df.apply(
-    lambda row: compute_correct_lp(
-        row["Basic Salary"],
-        row["LP_Count"]
-    ),
-    axis=1
-)
+        merged_df["Correct_Long_Pay"] = merged_df.apply(
+            lambda row: compute_correct_lp(
+                row["Basic Salary"],
+                row["LP_Count"]
+            ),
+            axis=1
+        )
 
-merged_df["LP_Difference"] = (
-    merged_df["Longevity Pay"] - merged_df["Correct_Long_Pay"]
-).round(2)
+        merged_df["LP_Difference"] = (
+            merged_df["Longevity Pay"] - merged_df["Correct_Long_Pay"]
+        ).round(2)
 
-merged_df["Error_Flag"] = merged_df["LP_Difference"].abs() > 1
+        merged_df["Error_Flag"] = merged_df["LP_Difference"].abs() > 1
 
 
 # ============================
