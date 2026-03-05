@@ -469,8 +469,8 @@ if orders_file is not None:
 
     orders_df = pd.read_csv(orders_file)
 
-    orders_df["Effective Date"] = pd.to_datetime(
-        orders_df["Effective Date"]
+    orders_df["Date of Entry"] = pd.to_datetime(
+        orders_df["Date of Entry"]
     )
 
     orders_df["Upload_Time"] = datetime.now()
@@ -490,7 +490,7 @@ if orders_df is not None:
                 "Order Number",
                 "Serial Number",
                 "LP Level",
-                "Effective Date",
+                "Date of Entry",
                 "Upload_Time"
             ]
         ]
