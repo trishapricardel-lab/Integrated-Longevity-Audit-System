@@ -49,6 +49,8 @@ st.set_page_config(
     page_title="Integrated Longevity Audit System",
     layout="wide"
 )
+if "view" not in st.session_state:
+    st.session_state.view = None
 st.markdown("""
 <style>
 .metric-card button {
