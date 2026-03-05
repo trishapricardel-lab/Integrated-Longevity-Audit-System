@@ -363,7 +363,6 @@ st.markdown("---")
 # COMMAND DASHBOARD
 # ============================
 
-st.markdown("---")
 st.header("📊 Command Dashboard")
 
 if "summary_df" in locals():
@@ -393,7 +392,6 @@ with col3:
 
 with col4:
     st.metric("Risk Alerts", risk_alerts)
-    
 
 # ============================
 # RANK DISCREPANCY SUMMARY
@@ -414,7 +412,6 @@ if "Rank" in merged_df.columns:
 
 else:
     st.info("Upload files to generate rank discrepancy summary.")
-
 
 st.markdown("---")
 
