@@ -31,6 +31,11 @@ from modules.dashboards import (
     financial_impact_panel
 )
 
+from modules.irregularity_engine import detect_mismatch
+from modules.case_tracker import generate_cases
+from modules.recommendation_engine import recommend_action
+from modules.timeline_analyzer import build_timeline
+
 # ============================
 # LOGIN
 # ============================
@@ -123,6 +128,10 @@ if soi_file is not None and payroll_files:
         merged_df = compute_longevity(merged_df)
 
         summary_df = create_summary(merged_df)
+        
+        mismatch_df = detect_mismatch(merged_df)
+
+        cases_df = generate_cases(mismatch_df)
 
     except Exception as e:
 
@@ -151,6 +160,10 @@ if len(orders_list) > 0:
 # ============================
 # DASHBOARDS
 # ============================
+
+st.header("📁 Case Tracking")
+
+st.dataframe(cases_df)
 
 if merged_df is not None:
     irregularity_summary(merged_df, soi_df, orders_df)
