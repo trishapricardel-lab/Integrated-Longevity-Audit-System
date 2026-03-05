@@ -217,6 +217,30 @@ if summary_df is not None and merged_df is not None:
 
     executive_dashboard(summary_df, merged_df)
 
+# ============================
+# DATA VIEW (DRILL DOWN)
+# ============================
+
+if "view" in st.session_state:
+
+    st.markdown("---")
+    st.subheader("📂 Data View")
+
+    if st.session_state.view == "personnel":
+        st.dataframe(summary_df)
+
+    elif st.session_state.view == "payroll":
+        st.dataframe(merged_df)
+
+    elif st.session_state.view == "errors":
+        st.dataframe(summary_df[summary_df["Months_Incorrect"] > 0])
+
+    elif st.session_state.view == "overpayment":
+        st.dataframe(summary_df[summary_df["Total_Overpaid"] > 0])
+
+    elif st.session_state.view == "underpayment":
+        st.dataframe(summary_df[summary_df["Total_Underpaid"] > 0])
+
 # ----------------------------
 
 if merged_df is not None:
