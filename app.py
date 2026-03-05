@@ -5,6 +5,7 @@ from modules.auth import login
 from modules.database import connect_db, create_tables
 from modules.file_manager import create_directories
 from modules.audit import log_action
+from modules.admin_panel import admin_controls
 
 from modules.uploads import (
     handle_soi_upload,
@@ -72,6 +73,12 @@ st.sidebar.write("Role:", st.session_state.role)
 if st.sidebar.button("Logout"):
     st.session_state.logged_in = False
     st.rerun()
+    
+# ============================
+# ADMIN PANEL
+# ============================
+
+admin_controls(cursor, conn)
 
 # ============================
 # FILE UPLOAD SECTION
