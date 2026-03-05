@@ -289,7 +289,7 @@ if st.session_state.role == "Admin":
             st.rerun()
 
     else:
-    st.sidebar.write("No payroll files found")
+        st.sidebar.write("No payroll files found")
 
     # ============================
     # DELETE AUDIT LOG ENTRY
