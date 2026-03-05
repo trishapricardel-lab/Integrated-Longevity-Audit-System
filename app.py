@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 import pandas as pd
 
@@ -173,4 +172,3 @@ audit_df = pd.read_sql_query(
 )
 
 st.dataframe(audit_df)
-```
