@@ -5,6 +5,61 @@ import os
 from datetime import datetime
 
 # ============================
+# LOGIN SYSTEM
+# ============================
+
+users = {
+    "adjutant": {"password": "admin123", "role": "Adjutant"},
+    "s1": {"password": "s1pass", "role": "S1"},
+    "finance": {"password": "finpass", "role": "Finance"},
+    "commander": {"password": "viewonly", "role": "Command"}
+}
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+
+    st.title("Longevity Pay Forensic Audit System")
+
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+
+        if username in users and users[username]["password"] == password:
+
+            st.session_state.logged_in = True
+            st.session_state.username = username
+            st.session_state.role = users[username]["role"]
+
+            st.success("Login successful")
+            st.rerun()
+
+        else:
+
+            st.error("Invalid credentials")
+
+    st.stop()
+
+# ============================
+# SIDEBAR USER PANEL
+# ============================
+
+st.sidebar.title("User")
+
+st.sidebar.write("Logged in as:")
+st.sidebar.write(st.session_state.username)
+
+st.sidebar.write("Role:")
+st.sidebar.write(st.session_state.role)
+
+if st.sidebar.button("Logout"):
+
+    st.session_state.logged_in = False
+    st.rerun()
+
+# ============================
 # CREATE STORAGE DIRECTORIES
 # ============================
 
@@ -47,21 +102,39 @@ st.markdown("---")
 
 st.header("1. Upload Required Files")
 
-soi_file = st.file_uploader(
-    "Upload SOI File (S1) - CSV",
-    type=["csv"]
-)
+if st.session_state.role in ["S1","Adjutant"]:
 
-orders_file = st.file_uploader(
-    "Upload Longevity Orders (Adjutant) - CSV",
-    type=["csv"]
-)
+    soi_file = st.file_uploader(
+        "Upload SOI File (S1) - CSV",
+        type=["csv"]
+    )
 
-payroll_files = st.file_uploader(
-    "Upload Monthly Payroll Files (Finance) - CSV",
-    type=["csv"],
-    accept_multiple_files=True
-)
+else:
+
+    st.info("Only S1 can upload SOI files.")
+
+if st.session_state.role == "Adjutant":
+
+    orders_file = st.file_uploader(
+        "Upload Longevity Orders",
+        type=["csv"]
+    )
+
+else:
+
+    orders_file = None
+
+if st.session_state.role == "Finance":
+
+    payroll_files = st.file_uploader(
+        "Upload Monthly Payroll Files",
+        type=["csv"],
+        accept_multiple_files=True
+    )
+
+else:
+
+    payroll_files = []
 
 # ============================
 # LOAD ORDERS
