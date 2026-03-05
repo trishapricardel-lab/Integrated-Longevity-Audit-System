@@ -397,7 +397,7 @@ with col4:
 # RANK DISCREPANCY SUMMARY
 # ============================
 
-st.subheader("📊 Longevity Pay Discrepancy by Rank")
+    st.subheader("📊 Longevity Pay Discrepancy by Rank")
 
     if "Rank" in merged_df.columns:
 
