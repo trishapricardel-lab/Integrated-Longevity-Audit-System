@@ -226,24 +226,18 @@ if st.session_state.role in ["Admin","Finance"]:
         accept_multiple_files=True
     )
 
-    if payroll_files:
+if payroll_files:
 
-        for file in payroll_files:
+    for file in payroll_files:
 
-            path = f"data/payroll/{file.name}"
+        path = f"data/payroll/{file.name}"
 
-            with open(path, "wb") as f:
-                f.write(file.getbuffer())
+        with open(path, "wb") as f:
+            f.write(file.getbuffer())
 
-        st.success("Payroll files saved")
-            for file in payroll_files:
+        log_action(st.session_state.username, "Upload Payroll", file.name)
 
-    path = f"data/payroll/{file.name}"
-
-    with open(path, "wb") as f:
-        f.write(file.getbuffer())
-
-    log_action(st.session_state.username, "Upload Payroll", file.name)
+    st.success("Payroll files saved")
 
 else:
     payroll_files = []
