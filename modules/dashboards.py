@@ -226,3 +226,39 @@ def irregularity_summary(merged_df, soi_df, orders_df):
             "Order Issued but Payroll Not Updated",
             order_not_paid_count
         )
+# ============================
+# FINANCIAL IMPACT PANEL
+# ============================
+
+def financial_impact_panel(summary_df):
+
+    import streamlit as st
+
+    st.markdown("---")
+    st.header("💰 Financial Impact Analysis")
+
+    if summary_df is None:
+        st.info("Upload files to generate financial impact analysis.")
+        return
+
+    total_personnel = summary_df["Serial Number"].nunique()
+
+    total_overpayment = summary_df["Total_Overpaid"].sum()
+
+    total_underpayment = summary_df["Total_Underpaid"].sum()
+
+    total_variance = summary_df["Total_Variance"].sum()
+
+    col1, col2, col3, col4 = st.columns(4)
+
+    with col1:
+        st.metric("Personnel Affected", total_personnel)
+
+    with col2:
+        st.metric("Total Overpayment", f"₱{total_overpayment:,.2f}")
+
+    with col3:
+        st.metric("Total Underpayment", f"₱{total_underpayment:,.2f}")
+
+    with col4:
+        st.metric("Total Variance", f"₱{total_variance:,.2f}")
