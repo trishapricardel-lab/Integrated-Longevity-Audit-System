@@ -51,6 +51,33 @@ st.set_page_config(
     layout="wide"
 )
 
+st.markdown("""
+<style>
+
+/* METRIC CARD STYLE */
+[data-testid="stMetric"] {
+    background-color: #0f1c2e;
+    border: 1px solid #2c3e50;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* METRIC LABEL */
+[data-testid="stMetricLabel"] {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* METRIC VALUE */
+[data-testid="stMetricValue"] {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 # ============================
 # SYSTEM SETUP
 # ============================
