@@ -42,7 +42,56 @@ if orders_file is not None:
     orders_df["Upload_Time"] = datetime.now()
 
 st.markdown("---")
+# =====================================
+# LONGEVITY ORDER ARCHIVE
+# =====================================
 
+st.markdown("---")
+st.header("Longevity Order Archive")
+
+if orders_file is not None:
+
+    # Load Orders
+    orders_df = pd.read_csv(orders_file)
+
+    # Convert date column
+    orders_df["Effective Date"] = pd.to_datetime(
+        orders_df["Effective Date"]
+    )
+
+    # Add upload timestamp
+    orders_df["Upload_Time"] = datetime.now()
+
+    # Display full order list
+    st.subheader("Uploaded Longevity Orders")
+
+    st.dataframe(
+        orders_df[
+            [
+                "Order Number",
+                "Serial Number",
+                "LP Level",
+                "Effective Date",
+                "Upload_Time"
+            ]
+        ]
+    )
+
+    # ==========================
+    # ORDER SUMMARY
+    # ==========================
+
+    st.subheader("Order Summary")
+
+    order_summary = orders_df.groupby(
+        "Order Number"
+    ).size().reset_index(name="Personnel_Count")
+
+    st.dataframe(order_summary)
+
+else:
+
+    st.info("No longevity orders uploaded yet.")
 # ============================
 # PROCESSING
 # ============================
