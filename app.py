@@ -152,7 +152,22 @@ if soi_file is not None and payroll_files:
             Total_Overpaid=("LP_Difference", lambda x: x[x > 1].sum()),
             Total_Underpaid=("LP_Difference", lambda x: abs(x[x < -1].sum()))
         ).reset_index()
+        def risk_level(months):
+            
+            if months == 0:
+                return "🟢 Compliant"
 
+            elif months <= 2:
+                return "🟡 Low Risk"
+
+            elif months <= 4:
+                return "🟠 Medium Risk"
+
+            else:
+                return "🔴 High Risk"
+
+
+summary_df["Risk_Level"] = summary_df["Months_Incorrect"].apply(risk_level)
         # ------------------------
         # DASHBOARD
         # ------------------------
