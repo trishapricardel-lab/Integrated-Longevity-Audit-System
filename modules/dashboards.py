@@ -85,74 +85,69 @@ def irregularity_summary(merged_df, soi_df, orders_df):
             order_not_paid_count
         )
 
-
-# ============================
-# FINANCIAL IMPACT ANALYSIS
-# ============================
-
-def financial_impact_panel(summary_df):
+def executive_dashboard(summary_df, merged_df):
 
     st.markdown("---")
-    st.header("💰 Financial Impact Analysis")
+    st.header("📊 Executive Financial Dashboard")
 
-    if summary_df is None:
-        st.info("Upload files to generate financial impact analysis.")
+    if summary_df is None or merged_df is None:
+        st.info("Upload files to generate dashboard.")
         return
 
+    # Coverage
     personnel = summary_df["Serial Number"].nunique()
-    overpayment = summary_df["Total_Overpaid"].sum()
-    underpayment = summary_df["Total_Underpaid"].sum()
-    variance = summary_df["Total_Variance"].sum()
+    payroll_records = merged_df.shape[0]
 
-    col1, col2, col3, col4 = st.columns(4)
+    # Error counts
+    personnel_errors = (summary_df["Months_Incorrect"] > 0).sum()
 
-    with col1:
-        st.metric("Personnel Affected", personnel)
+    overpayment_df = summary_df[summary_df["Total_Overpaid"] > 0]
+    underpayment_df = summary_df[summary_df["Total_Underpaid"] > 0]
 
-    with col2:
-        st.metric("Total Overpayment", f"₱{overpayment:,.2f}")
+    personnel_overpaid = overpayment_df.shape[0]
+    personnel_underpaid = underpayment_df.shape[0]
 
-    with col3:
-        st.metric("Total Underpayment", f"₱{underpayment:,.2f}")
+    total_overpayment = summary_df["Total_Overpaid"].sum()
+    total_underpayment = summary_df["Total_Underpaid"].sum()
 
-    with col4:
-        st.metric("Total Variance", f"₱{variance:,.2f}")
-
-
-# ============================
-# COMMAND DASHBOARD
-# ============================
-
-def command_dashboard(summary_df):
-
-    st.markdown("---")
-    st.header("📊 Command Dashboard")
-
-    if summary_df is None:
-        st.info("Upload files to generate command dashboard.")
-        return
-
-    personnel = summary_df["Serial Number"].nunique()
-
-    risk_cases = (summary_df["Months_Incorrect"] > 0).sum()
-
-    highest_variance = summary_df["Total_Variance"].abs().max()
-
-    avg_variance = summary_df["Total_Variance"].mean()
-
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2 = st.columns(2)
 
     with col1:
         st.metric("Personnel Audited", personnel)
+        if st.button("View Personnel Audited"):
+            st.session_state.view = "personnel"
 
     with col2:
-        st.metric("Personnel With Errors", risk_cases)
+        st.metric("Payroll Records", payroll_records)
+        if st.button("View Payroll Records"):
+            st.session_state.view = "payroll"
+
+    col3, col4 = st.columns(2)
 
     with col3:
-        st.metric("Highest Variance", f"₱{highest_variance:,.2f}")
+        st.metric("Personnel with Errors", personnel_errors)
+        if st.button("View Errors"):
+            st.session_state.view = "errors"
 
     with col4:
-        st.metric("Average Variance", f"₱{avg_variance:,.2f}")
+        st.metric("Personnel with Overpayment", personnel_overpaid)
+        if st.button("View Overpayment Cases"):
+            st.session_state.view = "overpayment"
+
+    col5, col6 = st.columns(2)
+
+    with col5:
+        st.metric("Total Overpayment", f"₱{total_overpayment:,.2f}")
+
+    with col6:
+        st.metric("Personnel with Underpayment", personnel_underpaid)
+        if st.button("View Underpayment Cases"):
+            st.session_state.view = "underpayment"
+
+    col7, col8 = st.columns(2)
+
+    with col7:
+        st.metric("Total Underpayment", f"₱{total_underpayment:,.2f}")
 
 
 # ============================
