@@ -133,6 +133,126 @@ if st.sidebar.button("Logout"):
     st.rerun()
 
 # ============================
+# ADMIN FILE CONTROL PANEL
+# ============================
+
+if st.session_state.role == "Admin":
+
+    st.sidebar.markdown("---")
+    st.sidebar.header("Admin File Control Panel")
+
+    # ==================================
+    # DELETE SOI FILE
+    # ==================================
+
+    st.sidebar.subheader("Delete SOI File")
+
+    soi_files = os.listdir("data/soi")
+
+    if len(soi_files) > 0:
+
+        soi_to_delete = st.sidebar.selectbox(
+            "Select SOI File",
+            soi_files,
+            key="delete_soi"
+        )
+
+        confirm_soi = st.sidebar.checkbox(
+            "Confirm SOI deletion",
+            key="confirm_soi"
+        )
+
+        if confirm_soi and st.sidebar.button("Delete SOI File"):
+
+            os.remove(f"data/soi/{soi_to_delete}")
+
+            log_action(
+                st.session_state.username,
+                "Delete SOI File",
+                soi_to_delete
+            )
+
+            st.sidebar.success("SOI file deleted successfully")
+            st.rerun()
+
+    else:
+        st.sidebar.write("No SOI files found")
+
+    # ==================================
+    # DELETE ORDER FILE
+    # ==================================
+
+    st.sidebar.subheader("Delete Order File")
+
+    order_files = os.listdir("data/orders")
+
+    if len(order_files) > 0:
+
+        order_to_delete = st.sidebar.selectbox(
+            "Select Order File",
+            order_files,
+            key="delete_order"
+        )
+
+        confirm_order = st.sidebar.checkbox(
+            "Confirm order deletion",
+            key="confirm_order"
+        )
+
+        if confirm_order and st.sidebar.button("Delete Order File"):
+
+            os.remove(f"data/orders/{order_to_delete}")
+
+            log_action(
+                st.session_state.username,
+                "Delete Order File",
+                order_to_delete
+            )
+
+            st.sidebar.success("Order file deleted successfully")
+            st.rerun()
+
+    else:
+        st.sidebar.write("No order files found")
+
+    # ==================================
+    # DELETE PAYROLL FILE
+    # ==================================
+
+    st.sidebar.subheader("Delete Payroll File")
+
+    payroll_repo_files = os.listdir("data/payroll")
+
+    if len(payroll_repo_files) > 0:
+
+        payroll_to_delete = st.sidebar.selectbox(
+            "Select Payroll File",
+            payroll_repo_files,
+            key="delete_payroll"
+        )
+
+        confirm_payroll = st.sidebar.checkbox(
+            "Confirm payroll deletion",
+            key="confirm_payroll"
+        )
+
+        if confirm_payroll and st.sidebar.button("Delete Payroll File"):
+
+            os.remove(f"data/payroll/{payroll_to_delete}")
+
+            log_action(
+                st.session_state.username,
+                "Delete Payroll File",
+                payroll_to_delete
+            )
+
+            st.sidebar.success("Payroll file deleted successfully")
+            st.rerun()
+
+    else:
+        st.sidebar.write("No payroll files found")
+
+# ============================
 # SIDEBAR DATA REPOSITORY
 # ============================
 
@@ -155,6 +275,8 @@ st.sidebar.subheader("Payroll Files")
 payroll_list = os.listdir("data/payroll")
 for file in payroll_list:
     st.sidebar.write(file)
+
+
 
 # ============================
 # MAIN PAGE
