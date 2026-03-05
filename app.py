@@ -565,29 +565,29 @@ if soi_file is not None and payroll_files:
         st.success("All eligible personnel have orders issued.")
         
         # ============================
-# ORDER ISSUED BUT PAYROLL NOT UPDATED
-# ============================
+        # ORDER ISSUED BUT PAYROLL NOT UPDATED
+        # ============================
 
-if orders_df is not None:
+        if orders_df is not None:
 
-    order_not_paid = orders_df[
-        ~orders_df["Serial Number"].isin(merged_df["Serial Number"])
-    ]
+            order_not_paid = orders_df[
+                ~orders_df["Serial Number"].isin(merged_df["Serial Number"])
+            ]
 
-    if len(order_not_paid) > 0:
+            if len(order_not_paid) > 0:
 
-        st.subheader("⚠ Orders Issued but Payroll Not Updated")
+                st.subheader("⚠ Orders Issued but Payroll Not Updated")
 
-        st.metric(
-            "Personnel With Order but No LP Payment",
-            len(order_not_paid)
-        )
+                st.metric(
+                    "Personnel With Order but No LP Payment",
+                    len(order_not_paid)
+                )
 
-        st.dataframe(order_not_paid)
+                st.dataframe(order_not_paid)
 
-    else:
+            else:
 
-        st.success("All issued orders reflected in payroll.")
+                st.success("All issued orders reflected in payroll.")
         
         
         
