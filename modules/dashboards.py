@@ -3,7 +3,7 @@ import pandas as pd
 
 
 # ============================
-# IRREGULARITY SUMMARY
+# DETECTED FINANCIAL IRREGULARITIES
 # ============================
 
 def irregularity_summary(merged_df, soi_df, orders_df):
@@ -55,19 +55,21 @@ def irregularity_summary(merged_df, soi_df, orders_df):
     else:
         order_not_paid_count = 0
 
+    st.write("### Status Overview")
+
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.metric("Incorrect LP Computation", incorrect_count)
+        st.metric("Incorrect LP", incorrect_count)
 
     with col2:
-        st.metric("LP Without Order", lp_without_order_count)
+        st.metric("No Order", lp_without_order_count)
 
     with col3:
-        st.metric("Eligible Without Order", missing_orders_count)
+        st.metric("Eligible No Order", missing_orders_count)
 
     with col4:
-        st.metric("Order Not in Payroll", order_not_paid_count)
+        st.metric("Order Not Paid", order_not_paid_count)
 
 
 # ============================
@@ -104,81 +106,6 @@ def financial_impact_panel(summary_df):
 
 
 # ============================
-# PERSONNEL STATUS PANEL
-# ============================
-
-def personnel_status_panel(merged_df, soi_df, orders_df):
-
-    st.markdown("---")
-    st.header("📌 Personnel Longevity Status")
-
-    if merged_df is None or soi_df is None:
-        st.info("Upload files to analyze personnel longevity status.")
-        return
-
-    # LP without order
-    if orders_df is not None:
-
-        lp_without_order = merged_df[
-            (merged_df["Longevity Pay"] > 0) &
-            (~merged_df["Serial Number"].isin(orders_df["Serial Number"]))
-        ]
-
-        st.subheader("LP Without Order")
-
-        st.metric(
-            "Cases Detected",
-            lp_without_order["Serial Number"].nunique()
-        )
-
-        st.dataframe(
-            lp_without_order[
-                ["Serial Number", "Payroll Month", "Longevity Pay"]
-            ]
-        )
-
-    # Eligible but no order
-
-    if orders_df is not None:
-
-        eligible_df = soi_df[soi_df["Eligible_LP_Level"] > 0]
-
-        missing_orders = eligible_df[
-            ~eligible_df["Serial Number"].isin(orders_df["Serial Number"])
-        ]
-
-        st.subheader("Personnel Eligible but NO LP Order")
-
-        st.metric(
-            "Personnel Eligible Without Order",
-            missing_orders["Serial Number"].nunique()
-        )
-
-        st.dataframe(
-            missing_orders[
-                ["Serial Number", "Years_of_Service", "Eligible_LP_Level"]
-            ]
-        )
-
-    # Order but not paid
-
-    if orders_df is not None:
-
-        order_not_paid = orders_df[
-            ~orders_df["Serial Number"].isin(merged_df["Serial Number"])
-        ]
-
-        st.subheader("Orders Issued but Payroll NOT Updated")
-
-        st.metric(
-            "Cases Detected",
-            order_not_paid["Serial Number"].nunique()
-        )
-
-        st.dataframe(order_not_paid)
-
-
-# ============================
 # COMMAND DASHBOARD
 # ============================
 
@@ -208,7 +135,7 @@ def command_dashboard(summary_df):
         st.metric("Personnel With Errors", risk_cases)
 
     with col3:
-        st.metric("Highest Financial Variance", f"₱{highest_variance:,.2f}")
+        st.metric("Highest Variance", f"₱{highest_variance:,.2f}")
 
     with col4:
         st.metric("Average Variance", f"₱{avg_variance:,.2f}")
@@ -238,7 +165,7 @@ def rank_summary(merged_df):
 
 
 # ============================
-# INVESTIGATION PANEL
+# PERSONNEL INVESTIGATION PANEL
 # ============================
 
 def investigation_panel(summary_df, merged_df):
