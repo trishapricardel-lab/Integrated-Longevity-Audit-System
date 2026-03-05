@@ -549,18 +549,26 @@ if soi_file is not None and payroll_files:
         )
 
         # ============================
-        # LOAD PAYROLL FILES
+        # LOAD PAYROLL FILES FROM REPOSITORY
         # ============================
+
+        payroll_files_repo = os.listdir("data/payroll")
 
         payroll_list = []
 
-        for file in payroll_files:
+        for file in payroll_files_repo:
 
-            df = pd.read_csv(file)
+            path = f"data/payroll/{file}"
+
+            df = pd.read_csv(path)
 
             df.columns = df.columns.str.strip()
 
             payroll_list.append(df)
+
+        if len(payroll_list) == 0:
+            st.error("No payroll files uploaded yet.")
+            st.stop()
 
         payroll_df = pd.concat(payroll_list, ignore_index=True)
 
