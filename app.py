@@ -518,7 +518,17 @@ if soi_file is not None and payroll_files:
         # LOAD SOI
         # ============================
 
-        soi_df = pd.read_csv(soi_file)
+        soi_files = os.listdir("data/soi")
+
+        if len(soi_files) == 0:
+            st.error("No SOI files uploaded yet.")
+            st.stop()
+
+        latest_soi = sorted(soi_files)[-1]
+
+        soi_path = f"data/soi/{latest_soi}"
+
+        soi_df = pd.read_csv(soi_path)
 
         # Clean column names
         soi_df.columns = soi_df.columns.str.strip()
