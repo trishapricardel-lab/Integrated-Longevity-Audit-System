@@ -389,10 +389,45 @@ if soi_file is not None and payroll_files:
 
         st.header("3. Individual Discrepancy Summary")
 
+        st.markdown("---")
+        st.header("5. Personnel Investigation Panel")
+
+        selected_serial = st.selectbox(
+            "Select Personnel Serial Number",
+            summary_df["Serial Number"]
+        )
+
+        person_summary = summary_df[
+            summary_df["Serial Number"] == selected_serial
+        ]
+
+        person_history = merged_df[
+            merged_df["Serial Number"] == selected_serial
+        ]
+
+        st.subheader("Personnel Financial Summary")
+
+        st.dataframe(person_summary)
+
+        st.subheader("Monthly Payroll History")
+
+        st.dataframe(
+            person_history[
+                [
+                    "Payroll Month",
+                    "Basic Salary",
+                    "Longevity Pay",
+                    "Correct_Long_Pay",
+                    "LP_Difference"
+                ]
+            ]
+        )
+
         st.dataframe(summary_df)
 
         st.markdown("---")
 
+        
         st.header("4. Detailed Monthly Audit")
 
         st.dataframe(merged_df)
