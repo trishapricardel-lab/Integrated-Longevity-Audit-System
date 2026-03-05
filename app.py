@@ -420,7 +420,7 @@ if soi_file is not None and payroll_files:
                 ]
             ]
         )
- st.header("🔍 Individual Discrepancy Summary")
+        st.header("🔍 Individual Discrepancy Summary")
 
         st.markdown("---")
         st.dataframe(summary_df)
