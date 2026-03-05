@@ -126,7 +126,27 @@ if soi_file is not None and payroll_files:
     except Exception as e:
 
         st.error(f"Processing Error: {e}")
+import os
+import pandas as pd
 
+orders_df = None
+
+orders_files = os.listdir("data/orders")
+
+orders_list = []
+
+for file in orders_files:
+
+    path = f"data/orders/{file}"
+
+    df = pd.read_csv(path)
+
+    df.columns = df.columns.str.strip()
+
+    orders_list.append(df)
+
+if len(orders_list) > 0:
+    orders_df = pd.concat(orders_list, ignore_index=True)
 # ============================
 # DASHBOARDS
 # ============================
