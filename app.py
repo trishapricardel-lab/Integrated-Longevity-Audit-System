@@ -136,6 +136,8 @@ if st.sidebar.button("Logout"):
 # ADMIN FILE CONTROL PANEL
 # ============================
 
+st.sidebar.markdown("## ⚙️ Admin Controls")
+
 if st.session_state.role == "Admin":
 
     st.sidebar.markdown("---")
