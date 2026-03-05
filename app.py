@@ -365,17 +365,32 @@ st.header("📊 Command Dashboard")
 
 col1, col2, col3, col4 = st.columns(4)
 
+if "summary_df" in locals():
+
+    total_personnel = summary_df["Serial Number"].nunique()
+    total_overpayment = summary_df["Total_Overpaid"].sum()
+    total_underpayment = summary_df["Total_Underpaid"].sum()
+    risk_alerts = (summary_df["Months_Incorrect"] > 0).sum()
+
+else:
+
+    total_personnel = 0
+    total_overpayment = 0
+    total_underpayment = 0
+    risk_alerts = 0
+
+
 with col1:
-    st.metric("Personnel Audited", "0")
+    st.metric("Personnel Audited", total_personnel)
 
 with col2:
-    st.metric("Overpayment Detected", "₱0")
+    st.metric("Overpayment Detected", f"₱{total_overpayment:,.2f}")
 
 with col3:
-    st.metric("Underpayment Detected", "₱0")
+    st.metric("Underpayment Detected", f"₱{total_underpayment:,.2f}")
 
 with col4:
-    st.metric("Risk Alerts", "0")
+    st.metric("Risk Alerts", risk_alerts)
 
 # ============================
 # RANK DISCREPANCY SUMMARY
