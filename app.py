@@ -148,6 +148,10 @@ if soi_file is not None and payroll_files:
 
         summary_df = merged_df.groupby("Serial Number").agg(
             Months_Incorrect=("Error_Flag", "sum"),
+
+            Months_Overpaid=("LP_Difference", lambda x: (x > 0).sum()),
+            Months_Underpaid=("LP_Difference", lambda x: (x < 0).sum()),
+
             Total_Variance=("LP_Difference", "sum"),
             Total_Overpaid=("LP_Difference", lambda x: x[x > 0].sum()),
             Total_Underpaid=("LP_Difference", lambda x: abs(x[x < 0].sum()))
