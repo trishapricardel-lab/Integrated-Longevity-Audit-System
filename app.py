@@ -402,7 +402,7 @@ with col4:
 
 st.subheader("📊 Longevity Pay Discrepancy by Rank")
 
-if "Rank" in merged_df.columns:
+if "merged_df" in locals() and "Rank" in merged_df.columns:
 
     rank_summary = merged_df.groupby("Rank").agg(
         Personnel=("Serial Number", "nunique"),
