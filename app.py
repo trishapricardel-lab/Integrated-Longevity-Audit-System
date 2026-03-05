@@ -289,43 +289,43 @@ if st.session_state.role == "Admin":
             st.rerun()
 
     else:
-        st.sidebar.write("No payroll files found")
-        
-        # ============================
-        # DELETE AUDIT LOG ENTRY
-        # ============================
+    st.sidebar.write("No payroll files found")
 
-        st.sidebar.subheader("Delete Audit Log Entry")
 
-        log_df = pd.read_sql_query(
-            "SELECT id, username, action, filename, timestamp FROM audit_log ORDER BY id DESC",
-            conn
+# ============================
+# DELETE AUDIT LOG ENTRY
+# ============================
+
+st.sidebar.subheader("Delete Audit Log Entry")
+
+log_df = pd.read_sql_query(
+    "SELECT id, username, action, filename, timestamp FROM audit_log ORDER BY id DESC",
+    conn
+)
+
+if len(log_df) > 0:
+
+    selected_log = st.sidebar.selectbox(
+        "Select Log ID",
+        log_df["id"]
+    )
+
+    confirm_log = st.sidebar.checkbox("Confirm log deletion")
+
+    if confirm_log and st.sidebar.button("Delete Log Entry"):
+
+        cursor.execute(
+            "DELETE FROM audit_log WHERE id=?",
+            (selected_log,)
         )
 
-        if len(log_df) > 0:
+        conn.commit()
 
-            selected_log = st.sidebar.selectbox(
-                "Select Log ID",
-                log_df["id"]
-            )
+        st.sidebar.success("Log entry deleted")
+        st.rerun()
 
-            confirm_log = st.sidebar.checkbox("Confirm log deletion")
-
-            if confirm_log and st.sidebar.button("Delete Log Entry"):
-
-                cursor.execute(
-                    "DELETE FROM audit_log WHERE id=?",
-                    (selected_log,)
-                )
-
-                conn.commit()
-
-                st.sidebar.success("Log entry deleted")
-                st.rerun()
-
-        else:
-
-            st.sidebar.write("No logs available")
+else:
+    st.sidebar.write("No logs available")
 
 # ============================
 # SIDEBAR DATA REPOSITORY
