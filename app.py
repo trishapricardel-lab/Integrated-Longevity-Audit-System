@@ -24,8 +24,7 @@ from modules.processing import (
 
 from modules.dashboards import (
     irregularity_summary,
-    financial_impact_panel,
-    command_dashboard,
+    executive_dashboard,
     rank_summary,
     investigation_panel
 )
@@ -214,15 +213,9 @@ if merged_df is not None:
 
 # ----------------------------
 
-if summary_df is not None:
+if summary_df is not None and merged_df is not None:
 
-    financial_impact_panel(summary_df)
-
-# ----------------------------
-
-if summary_df is not None:
-
-    command_dashboard(summary_df)
+    executive_dashboard(summary_df, merged_df)
 
 # ----------------------------
 
