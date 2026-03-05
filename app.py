@@ -663,17 +663,33 @@ if len(soi_files) > 0:
             key="soi_file_filter"
         )
 
+    path = f"data/soi/{selected_soi}"
+
+    soi_archive_df = pd.read_csv(path)
+
+    soi_archive_df.columns = soi_archive_df.columns.str.strip()
+
+    soi_archive_df["Source_File"] = selected_soi
+    soi_archive_df["Upload_Date"] = datetime.fromtimestamp(
+        os.path.getmtime(path)
+    )
+
     with col2:
 
-        rank_options = ["All"] + sorted(
-            soi_archive_df["Rank"].dropna().unique().tolist()
-        )
+        if "Rank" in soi_archive_df.columns:
 
-        selected_rank = st.selectbox(
-            "Rank",
-            rank_options,
-            key="soi_rank_filter"
-        )
+            rank_options = ["All"] + sorted(
+                soi_archive_df["Rank"].dropna().unique().tolist()
+            )
+
+            selected_rank = st.selectbox(
+                "Rank",
+                rank_options,
+                key="soi_rank_filter"
+            )
+
+        else:
+            selected_rank = "All"
 
     with col3:
 
@@ -682,10 +698,27 @@ if len(soi_files) > 0:
             key="soi_serial_search"
         )
 
-        if selected_rank != "All":
-            soi_archive_df = soi_archive_df[
-                soi_archive_df["Rank"] == selected_rank
-            ]
+    # ============================
+    # APPLY FILTERS
+    # ============================
+
+    if selected_rank != "All":
+
+        soi_archive_df = soi_archive_df[
+            soi_archive_df["Rank"] == selected_rank
+        ]
+
+    if serial_search:
+
+        soi_archive_df = soi_archive_df[
+            soi_archive_df["Serial Number"]
+            .astype(str)
+            .str.contains(serial_search)
+        ]
+
+    # ============================
+    # DISPLAY TABLE
+    # ============================
 
     display_columns = [
         "Rank",
@@ -696,7 +729,10 @@ if len(soi_files) > 0:
         "Upload_Date"
     ]
 
-    display_columns = [c for c in display_columns if c in soi_archive_df.columns]
+    display_columns = [
+        c for c in display_columns
+        if c in soi_archive_df.columns
+    ]
 
     st.dataframe(soi_archive_df[display_columns])
 
