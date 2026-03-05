@@ -317,11 +317,31 @@ for file in payroll_list:
 
 
 # ============================
-# MAIN PAGE
+# MAIN PAGE HEADER
 # ============================
 
-st.title("Longevity Pay Audit System")
-st.markdown("### Multi-Month Personnel–Finance Validation Engine")
+st.title("🛡️ Integrated Longevity Audit System")
+st.caption("Personnel–Finance Validation Engine")
+
+st.markdown("---")
+
+# COMMAND DASHBOARD
+
+st.header("📊 Command Dashboard")
+
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    st.metric("Personnel Audited", "0")
+
+with col2:
+    st.metric("Overpayment Detected", "₱0")
+
+with col3:
+    st.metric("Underpayment Detected", "₱0")
+
+with col4:
+    st.metric("Risk Alerts", "0")
 
 st.markdown("---")
 
