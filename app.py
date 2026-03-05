@@ -31,6 +31,13 @@ payroll_files = st.file_uploader(
     type=["csv"],
     accept_multiple_files=True
 )
+
+# ============================
+# LOAD ORDERS
+# ============================
+
+orders_df = None
+
 if orders_file is not None:
 
     orders_df = pd.read_csv(orders_file)
@@ -41,7 +48,6 @@ if orders_file is not None:
 
     orders_df["Upload_Time"] = datetime.now()
 
-st.markdown("---")
 # =====================================
 # LONGEVITY ORDER ARCHIVE
 # =====================================
@@ -49,20 +55,8 @@ st.markdown("---")
 st.markdown("---")
 st.header("Longevity Order Archive")
 
-if orders_file is not None:
+if orders_df is not None:
 
-    # Load Orders
-    orders_df = pd.read_csv(orders_file)
-
-    # Convert date column
-    orders_df["Effective Date"] = pd.to_datetime(
-        orders_df["Effective Date"]
-    )
-
-    # Add upload timestamp
-    orders_df["Upload_Time"] = datetime.now()
-
-    # Display full order list
     st.subheader("Uploaded Longevity Orders")
 
     st.dataframe(
@@ -77,10 +71,6 @@ if orders_file is not None:
         ]
     )
 
-    # ==========================
-    # ORDER SUMMARY
-    # ==========================
-
     st.subheader("Order Summary")
 
     order_summary = orders_df.groupby(
@@ -92,6 +82,7 @@ if orders_file is not None:
 else:
 
     st.info("No longevity orders uploaded yet.")
+
 # ============================
 # PROCESSING
 # ============================
@@ -116,6 +107,56 @@ if soi_file is not None and payroll_files:
             soi_df["Date of Entry"],
             format="%m/%d/%Y"
         )
+
+        # ------------------------
+        # YEARS OF SERVICE (SOI LEVEL)
+        # ------------------------
+
+        today = datetime.today()
+
+        soi_df["Years_of_Service"] = (
+            (today - soi_df["Date of Entry"]).dt.days / 365.25
+        )
+
+        soi_df["Eligible_LP_Level"] = soi_df["Years_of_Service"].apply(
+            lambda x: min(math.floor(x / 5), 5)
+        )
+
+        # ------------------------
+        # ELIGIBLE BUT NO ORDER
+        # ------------------------
+
+        if orders_df is not None:
+
+            eligible_df = soi_df[soi_df["Eligible_LP_Level"] > 0]
+
+            missing_orders = eligible_df[
+                ~eligible_df["Serial Number"].isin(orders_df["Serial Number"])
+            ]
+
+            st.markdown("---")
+            st.header("⚠ Personnel Eligible for Longevity but No Order")
+
+            if len(missing_orders) > 0:
+
+                st.metric(
+                    "Personnel Eligible Without Order",
+                    len(missing_orders)
+                )
+
+                st.dataframe(
+                    missing_orders[
+                        [
+                            "Serial Number",
+                            "Years_of_Service",
+                            "Eligible_LP_Level"
+                        ]
+                    ]
+                )
+
+            else:
+
+                st.success("All eligible personnel have longevity orders.")
 
         # ------------------------
         # LOAD PAYROLL FILES
@@ -211,16 +252,19 @@ if soi_file is not None and payroll_files:
 
         summary_df = merged_df.groupby("Serial Number").agg(
             Months_Incorrect=("Error_Flag", "sum"),
-
             Months_Overpaid=("LP_Difference", lambda x: (x > 0).sum()),
             Months_Underpaid=("LP_Difference", lambda x: (x < 0).sum()),
-
             Total_Variance=("LP_Difference", "sum"),
             Total_Overpaid=("LP_Difference", lambda x: x[x > 0].sum()),
             Total_Underpaid=("LP_Difference", lambda x: abs(x[x < 0].sum()))
         ).reset_index()
+
+        # ------------------------
+        # RISK LEVEL
+        # ------------------------
+
         def risk_level(months):
-            
+
             if months == 0:
                 return "🟢 Compliant"
 
@@ -233,8 +277,8 @@ if soi_file is not None and payroll_files:
             else:
                 return "🔴 High Risk"
 
-
         summary_df["Risk_Level"] = summary_df["Months_Incorrect"].apply(risk_level)
+
         # ------------------------
         # DASHBOARD
         # ------------------------
@@ -265,15 +309,16 @@ if soi_file is not None and payroll_files:
         st.header("3. Individual Discrepancy Summary")
 
         st.dataframe(
-        summary_df[
-            [
-                "Serial Number",
-                "Months_Incorrect",
-                "Months_Overpaid",
-                "Months_Underpaid",
-                "Total_Overpaid",
-                "Total_Underpaid",
-                "Total_Variance"
+            summary_df[
+                [
+                    "Serial Number",
+                    "Months_Incorrect",
+                    "Months_Overpaid",
+                    "Months_Underpaid",
+                    "Total_Overpaid",
+                    "Total_Underpaid",
+                    "Total_Variance",
+                    "Risk_Level"
                 ]
             ]
         )
