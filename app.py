@@ -497,24 +497,86 @@ else:
 # ============================
 
 st.markdown("---")
-st.header("Longevity Order Archive")
+st.header("📑 Longevity Order Archive")
 
-if orders_df is not None:
+orders_files = os.listdir("data/orders")
+soi_files = os.listdir("data/soi")
 
-    st.dataframe(
-        orders_df[
-            [
-                "Order Number",
-                "Serial Number",
-                "LP Level",
-                "Effective Date",
-                "Upload_Time"
-            ]
-        ]
-    )
+orders_list = []
+
+# Load orders
+for file in orders_files:
+
+    path = f"data/orders/{file}"
+
+    df = pd.read_csv(path)
+
+    df.columns = df.columns.str.strip()
+
+    df["Source_File"] = file
+
+    orders_list.append(df)
+
+if len(orders_list) > 0:
+
+    orders_df = pd.concat(orders_list, ignore_index=True)
+
+    # Load SOI for Rank and Name
+    if len(soi_files) > 0:
+
+        soi_path = f"data/soi/{sorted(soi_files)[-1]}"
+
+        soi_df = pd.read_csv(soi_path)
+
+        soi_df.columns = soi_df.columns.str.strip()
+
+        orders_df = pd.merge(
+            orders_df,
+            soi_df[["Serial Number","Rank","Name"]],
+            on="Serial Number",
+            how="left"
+        )
+
+    # Filters
+    col1, col2 = st.columns(2)
+
+    with col1:
+        rank_filter = st.selectbox(
+            "Filter by Rank",
+            ["All"] + sorted(orders_df["Rank"].dropna().unique().tolist())
+        )
+
+    with col2:
+        order_filter = st.selectbox(
+            "Filter by Order Number",
+            ["All"] + sorted(orders_df["Order Number"].dropna().unique().tolist())
+        )
+
+    filtered_df = orders_df.copy()
+
+    if rank_filter != "All":
+        filtered_df = filtered_df[filtered_df["Rank"] == rank_filter]
+
+    if order_filter != "All":
+        filtered_df = filtered_df[filtered_df["Order Number"] == order_filter]
+
+    display_columns = [
+        "Rank",
+        "Name",
+        "Serial Number",
+        "LP Level",
+        "Order Number",
+        "Effective Date",
+        "Source_File"
+    ]
+
+    display_columns = [c for c in display_columns if c in filtered_df.columns]
+
+    st.dataframe(filtered_df[display_columns])
 
 else:
-    st.info("No longevity orders uploaded yet.")
+
+    st.info("No orders uploaded yet.")
 
 # ============================
 # SOI ARCHIVE
