@@ -23,6 +23,17 @@ os.makedirs("data/payroll", exist_ok=True)
 conn = sqlite3.connect("longevity_system.db", check_same_thread=False)
 cursor = conn.cursor()
 
+def log_action(user, action, filename):
+
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    cursor.execute("""
+    INSERT INTO audit_log (username, action, filename, timestamp)
+    VALUES (?, ?, ?, ?)
+    """, (user, action, filename, timestamp))
+
+    conn.commit()
+
 # ============================
 # CREATE TABLES
 # ============================
@@ -58,6 +69,17 @@ longevity_pay REAL
 
 conn.commit()
 
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS audit_log (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+username TEXT,
+action TEXT,
+filename TEXT,
+timestamp TEXT
+)
+""")
+
+conn.commit()
 # ============================
 # LOGIN SYSTEM
 # ============================
@@ -166,6 +188,7 @@ if st.session_state.role in ["Admin", "S1", "Adjutant"]:
             f.write(soi_file.getbuffer())
 
         st.success("SOI saved to repository")
+        log_action(st.session_state.username, "Upload SOI", soi_file.name)
 
 else:
     st.info("Only S1 can upload SOI files.")
@@ -188,6 +211,7 @@ if st.session_state.role in ["Admin","Adjutant"]:
             f.write(orders_file.getbuffer())
 
         st.success("Orders saved")
+        log_action(st.session_state.username, "Upload Longevity Order", orders_file.name)
 
 else:
     orders_file = None
@@ -212,6 +236,14 @@ if st.session_state.role in ["Admin","Finance"]:
                 f.write(file.getbuffer())
 
         st.success("Payroll files saved")
+        for file in payroll_files:
+
+    path = f"data/payroll/{file.name}"
+
+    with open(path, "wb") as f:
+        f.write(file.getbuffer())
+
+    log_action(st.session_state.username, "Upload Payroll", file.name)
 
 else:
     payroll_files = []
@@ -383,3 +415,12 @@ if soi_file is not None and payroll_files:
 
 else:
     st.info("Upload SOI and Payroll files to start audit.")
+st.markdown("---")
+st.header("System Audit Log")
+
+audit_df = pd.read_sql_query(
+    "SELECT * FROM audit_log ORDER BY id DESC",
+    conn
+)
+
+st.dataframe(audit_df)
