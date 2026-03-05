@@ -650,31 +650,36 @@ soi_files = os.listdir("data/soi")
 
 if len(soi_files) > 0:
 
-    selected_soi = st.selectbox(
-        "Filter by SOI File",
-        soi_files
-    )
+    # ============================
+    # FILTER CONTROLS
+    # ============================
 
-    path = f"data/soi/{selected_soi}"
+    col1, col2, col3 = st.columns(3)
 
-    soi_archive_df = pd.read_csv(path)
+    with col1:
+        selected_soi = st.selectbox(
+            "SOI File",
+            soi_files,
+            key="soi_file_filter"
+        )
 
-    soi_archive_df.columns = soi_archive_df.columns.str.strip()
-
-    soi_archive_df["Source_File"] = selected_soi
-    soi_archive_df["Upload_Date"] = datetime.fromtimestamp(os.path.getmtime(path))
-
-    # Rank filter
-    if "Rank" in soi_archive_df.columns:
+    with col2:
 
         rank_options = ["All"] + sorted(
             soi_archive_df["Rank"].dropna().unique().tolist()
         )
 
         selected_rank = st.selectbox(
-            "Filter by Rank",
+            "Rank",
             rank_options,
             key="soi_rank_filter"
+        )
+
+    with col3:
+
+        serial_search = st.text_input(
+            "Search Serial Number",
+            key="soi_serial_search"
         )
 
         if selected_rank != "All":
