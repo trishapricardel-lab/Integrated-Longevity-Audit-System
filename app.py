@@ -7,6 +7,7 @@ from modules.file_manager import create_directories
 from modules.audit import log_action
 from modules.admin_panel import admin_controls
 
+
 from modules.uploads import (
     handle_soi_upload,
     handle_orders_upload,
@@ -25,7 +26,8 @@ from modules.dashboards import (
     command_dashboard,
     rank_summary,
     organizational_summary,
-    investigation_panel
+    investigation_panel,
+    irregularity_summary
 )
 
 # ============================
@@ -128,6 +130,8 @@ if soi_file is not None and payroll_files:
 # ============================
 # DASHBOARDS
 # ============================
+
+irregularity_summary(merged_df, soi_df, orders_df)
 
 command_dashboard(summary_df)
 
