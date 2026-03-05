@@ -514,11 +514,18 @@ if soi_file is not None and payroll_files:
 
     try:
 
+        # ============================
+        # LOAD SOI
+        # ============================
+
         soi_df = pd.read_csv(soi_file)
+
+        # Clean column names
+        soi_df.columns = soi_df.columns.str.strip()
 
         soi_df["Date of Entry"] = pd.to_datetime(
             soi_df["Date of Entry"],
-            format="%m/%d/%Y"
+            errors="coerce"
         )
 
         today = datetime.today()
@@ -531,20 +538,38 @@ if soi_file is not None and payroll_files:
             lambda x: min(math.floor(x / 5), 5)
         )
 
+        # ============================
+        # LOAD PAYROLL FILES
+        # ============================
+
         payroll_list = []
 
         for file in payroll_files:
+
             df = pd.read_csv(file)
+
+            df.columns = df.columns.str.strip()
+
             payroll_list.append(df)
 
         payroll_df = pd.concat(payroll_list, ignore_index=True)
 
-        payroll_df["Basic Salary"] = pd.to_numeric(payroll_df["Basic Salary"])
-        payroll_df["Longevity Pay"] = pd.to_numeric(payroll_df["Longevity Pay"])
+        payroll_df["Basic Salary"] = pd.to_numeric(
+            payroll_df["Basic Salary"], errors="coerce"
+        )
+
+        payroll_df["Longevity Pay"] = pd.to_numeric(
+            payroll_df["Longevity Pay"], errors="coerce"
+        )
 
         payroll_df["Payroll_Date"] = pd.to_datetime(
-            payroll_df["Payroll Month"] + "-01"
+            payroll_df["Payroll Month"] + "-01",
+            errors="coerce"
         )
+
+        # ============================
+        # MERGE SOI + PAYROLL
+        # ============================
 
         merged_df = pd.merge(
             payroll_df,
@@ -645,133 +670,154 @@ if soi_file is not None and payroll_files:
             else:
                 st.success("All issued orders reflected in payroll.")
 
-        # ============================
-        # CORRECT LP COMPUTATION
-        # ============================
+# ============================
+# CORRECT LP COMPUTATION
+# ============================
 
-        merged_df["Years_of_Service"] = (
-            (merged_df["Payroll_Date"] - merged_df["Date of Entry"]).dt.days / 365.25
-        )
+merged_df["Years_of_Service"] = (
+    (merged_df["Payroll_Date"] - merged_df["Date of Entry"]).dt.days / 365.25
+)
 
-        merged_df["LP_Count"] = merged_df["Years_of_Service"].apply(
-            lambda x: min(math.floor(x / 5), 5)
-        )
+merged_df["LP_Count"] = merged_df["Years_of_Service"].apply(
+    lambda x: min(math.floor(x / 5), 5)
+)
 
-        def compute_correct_lp(base_salary, lp_count):
+def compute_correct_lp(base_salary, lp_count):
 
-            if lp_count <= 0:
-                return 0
-            elif lp_count == 5:
-                return base_salary * 0.50
-            else:
-                return base_salary * (1.1 ** lp_count - 1)
+    if lp_count <= 0:
+        return 0
+    elif lp_count == 5:
+        return base_salary * 0.50
+    else:
+        return base_salary * (1.1 ** lp_count - 1)
 
-        merged_df["Correct_Long_Pay"] = merged_df.apply(
-            lambda row: compute_correct_lp(
-                row["Basic Salary"],
-                row["LP_Count"]
-            ),
-            axis=1
-        )
+merged_df["Correct_Long_Pay"] = merged_df.apply(
+    lambda row: compute_correct_lp(
+        row["Basic Salary"],
+        row["LP_Count"]
+    ),
+    axis=1
+)
 
-        merged_df["LP_Difference"] = (
-            merged_df["Longevity Pay"] - merged_df["Correct_Long_Pay"]
-        ).round(2)
+merged_df["LP_Difference"] = (
+    merged_df["Longevity Pay"] - merged_df["Correct_Long_Pay"]
+).round(2)
 
-        merged_df["Error_Flag"] = merged_df["LP_Difference"].abs() > 1
+merged_df["Error_Flag"] = merged_df["LP_Difference"].abs() > 1
 
-        summary_df = merged_df.groupby("Serial Number").agg(
-            Months_Incorrect=("Error_Flag", "sum"),
-            Total_Variance=("LP_Difference", "sum"),
-            Total_Overpaid=("LP_Difference", lambda x: x[x > 0].sum()),
-            Total_Underpaid=("LP_Difference", lambda x: abs(x[x < 0].sum()))
-        ).reset_index()
 
-        # ============================
-        # ORGANIZATIONAL SUMMARY
-        # ============================
+# ============================
+# PERSONNEL SUMMARY
+# ============================
 
-        total_overpayment = summary_df["Total_Overpaid"].sum()
-        total_underpayment = summary_df["Total_Underpaid"].sum()
+summary_df = merged_df.groupby("Serial Number").agg(
+    Months_Incorrect=("Error_Flag", "sum"),
+    Total_Variance=("LP_Difference", "sum"),
+    Total_Overpaid=("LP_Difference", lambda x: x[x > 0].sum()),
+    Total_Underpaid=("LP_Difference", lambda x: abs(x[x < 0].sum()))
+).reset_index()
 
-        st.header("2. Organizational Financial Summary")
 
-        col1, col2 = st.columns(2)
+# ============================
+# ORGANIZATIONAL SUMMARY
+# ============================
 
-        with col1:
-            st.metric("Total Overpayment", f"₱{total_overpayment:,.2f}")
+total_overpayment = summary_df["Total_Overpaid"].sum()
+total_underpayment = summary_df["Total_Underpaid"].sum()
 
-        with col2:
-            st.metric("Total Underpayment", f"₱{total_underpayment:,.2f}")
+st.header("📊 Organizational Financial Summary")
 
-        # ============================
-        # PERSONNEL INVESTIGATION PANEL
-        # ============================
+col1, col2 = st.columns(2)
 
-        st.markdown("---")
-        st.header("🧑‍⚖️ Personnel Investigation Panel")
+with col1:
+    st.metric("Total Overpayment", f"₱{total_overpayment:,.2f}")
 
-        selected_serial = st.selectbox(
-            "Select Personnel Serial Number",
-            summary_df["Serial Number"]
-        )
+with col2:
+    st.metric("Total Underpayment", f"₱{total_underpayment:,.2f}")
 
-        person_summary = summary_df[
-            summary_df["Serial Number"] == selected_serial
-        ]
 
-        person_history = merged_df[
-            merged_df["Serial Number"] == selected_serial
-        ]
+# ============================
+# PERSONNEL INVESTIGATION PANEL
+# ============================
 
-        st.subheader("Personnel Financial Summary")
-        st.dataframe(person_summary)
+st.markdown("---")
+st.header("🧑‍⚖️ Personnel Investigation Panel")
 
-        st.subheader("Monthly Payroll History")
+if len(summary_df) > 0:
 
-        st.dataframe(
-            person_history[
-                [
-                    "Payroll Month",
-                    "Basic Salary",
-                    "Longevity Pay",
-                    "Correct_Long_Pay",
-                    "LP_Difference"
-                ]
+    selected_serial = st.selectbox(
+        "Select Personnel Serial Number",
+        summary_df["Serial Number"]
+    )
+
+    person_summary = summary_df[
+        summary_df["Serial Number"] == selected_serial
+    ]
+
+    person_history = merged_df[
+        merged_df["Serial Number"] == selected_serial
+    ]
+
+    st.subheader("Personnel Financial Summary")
+    st.dataframe(person_summary)
+
+    st.subheader("Monthly Payroll History")
+
+    st.dataframe(
+        person_history[
+            [
+                "Payroll Month",
+                "Basic Salary",
+                "Longevity Pay",
+                "Correct_Long_Pay",
+                "LP_Difference"
             ]
-        )
+        ]
+    )
 
-        # ============================
-        # INDIVIDUAL DISCREPANCY SUMMARY
-        # ============================
+else:
+    st.info("No personnel records available.")
 
-        st.markdown("---")
-        st.header("🔍 Individual Discrepancy Summary")
-        st.dataframe(summary_df)
 
-        # ============================
-        # DETAILED MONTHLY AUDIT
-        # ============================
+# ============================
+# INDIVIDUAL DISCREPANCY SUMMARY
+# ============================
 
-        st.markdown("---")
-        st.header("4. Detailed Monthly Audit")
-        st.dataframe(merged_df)
+st.markdown("---")
+st.header("🔍 Individual Discrepancy Summary")
+st.dataframe(summary_df)
 
-        st.download_button(
-            label="Download Audit Report",
-            data=merged_df.to_csv(index=False).encode("utf-8"),
-            file_name="longevity_audit_report.csv",
-            mime="text/csv",
-        )
 
-    except Exception as e:
-        st.error(f"Processing Error: {e}")
+# ============================
+# DETAILED MONTHLY AUDIT
+# ============================
+
+st.markdown("---")
+st.header("📑 Detailed Monthly Audit")
+
+st.dataframe(merged_df)
+
+st.download_button(
+    label="Download Audit Report",
+    data=merged_df.to_csv(index=False).encode("utf-8"),
+    file_name="longevity_audit_report.csv",
+    mime="text/csv",
+)
+
+
+except Exception as e:
+    st.error(f"Processing Error: {e}")
 
 else:
     st.info("Upload SOI and Payroll files to start audit.")
 
+
+# ============================
+# SYSTEM AUDIT LOG
+# ============================
+
 st.markdown("---")
-st.header("System Audit Log")
+st.header("📜 System Audit Log")
 
 audit_df = pd.read_sql_query(
     "SELECT * FROM audit_log ORDER BY id DESC",
