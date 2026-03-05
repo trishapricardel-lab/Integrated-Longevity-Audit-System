@@ -492,13 +492,13 @@ if soi_file is not None and payroll_files:
             how="inner"
         )
         # ============================
-# IRREGULARITY DETECTION
-# ============================
+        # IRREGULARITY DETECTION
+        # ============================
 
-st.markdown("---")
-st.header("🚨 Longevity Pay Irregularity Detection")
+        st.markdown("---")
+        st.header("🚨 Longevity Pay Irregularity Detection")
 
-if orders_df is not None:
+        if orders_df is not None:
 
     # Personnel with LP but NO order
     lp_without_order = merged_df[
