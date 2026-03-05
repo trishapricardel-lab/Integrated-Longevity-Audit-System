@@ -491,6 +491,107 @@ if soi_file is not None and payroll_files:
             on="Serial Number",
             how="inner"
         )
+        # ============================
+# IRREGULARITY DETECTION
+# ============================
+
+st.markdown("---")
+st.header("🚨 Longevity Pay Irregularity Detection")
+
+if orders_df is not None:
+
+    # Personnel with LP but NO order
+    lp_without_order = merged_df[
+        (merged_df["Longevity Pay"] > 0) &
+        (~merged_df["Serial Number"].isin(orders_df["Serial Number"]))
+    ]
+
+    if len(lp_without_order) > 0:
+
+        st.subheader("⚠ Personnel Receiving LP but NO Official Order")
+
+        st.metric(
+            "Cases Detected",
+            len(lp_without_order)
+        )
+
+        st.dataframe(
+            lp_without_order[
+                [
+                    "Serial Number",
+                    "Payroll Month",
+                    "Longevity Pay"
+                ]
+            ]
+        )
+
+    else:
+
+        st.success("No unauthorized longevity payments detected.")
+        
+        # ============================
+# ELIGIBLE BUT NO ORDER
+# ============================
+
+eligible_df = soi_df[soi_df["Eligible_LP_Level"] > 0]
+
+if orders_df is not None:
+
+    missing_orders = eligible_df[
+        ~eligible_df["Serial Number"].isin(orders_df["Serial Number"])
+    ]
+
+    if len(missing_orders) > 0:
+
+        st.subheader("⚠ Personnel Eligible but No Longevity Order Issued")
+
+        st.metric(
+            "Personnel Eligible Without Order",
+            len(missing_orders)
+        )
+
+        st.dataframe(
+            missing_orders[
+                [
+                    "Serial Number",
+                    "Years_of_Service",
+                    "Eligible_LP_Level"
+                ]
+            ]
+        )
+
+    else:
+
+        st.success("All eligible personnel have orders issued.")
+        
+        # ============================
+# ORDER ISSUED BUT PAYROLL NOT UPDATED
+# ============================
+
+if orders_df is not None:
+
+    order_not_paid = orders_df[
+        ~orders_df["Serial Number"].isin(merged_df["Serial Number"])
+    ]
+
+    if len(order_not_paid) > 0:
+
+        st.subheader("⚠ Orders Issued but Payroll Not Updated")
+
+        st.metric(
+            "Personnel With Order but No LP Payment",
+            len(order_not_paid)
+        )
+
+        st.dataframe(order_not_paid)
+
+    else:
+
+        st.success("All issued orders reflected in payroll.")
+        
+        
+        
+        
 
         merged_df["Years_of_Service"] = (
             (merged_df["Payroll_Date"] - merged_df["Date of Entry"]).dt.days / 365.25
