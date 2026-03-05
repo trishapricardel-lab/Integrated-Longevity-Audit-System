@@ -60,16 +60,16 @@ def irregularity_summary(merged_df, soi_df, orders_df):
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.metric("Incorrect LP", incorrect_count)
+        st.metric("Incorrect Longevity Pay Computation ", incorrect_count)
 
     with col2:
-        st.metric("No Order", lp_without_order_count)
+        st.metric("Longevity Pay Without Official Order", lp_without_order_count)
 
     with col3:
-        st.metric("Eligible No Order", missing_orders_count)
+        st.metric("Eligible Personnel Without Longevity Order", missing_orders_count)
 
     with col4:
-        st.metric("Order Not Paid", order_not_paid_count)
+        st.metric("Order Issued but Payroll Not Updated", order_not_paid_count)
 
 
 # ============================
