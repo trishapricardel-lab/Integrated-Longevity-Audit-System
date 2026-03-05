@@ -464,24 +464,33 @@ if st.session_state.role in ["Admin", "Finance"]:
         st.success("Payroll files saved")
 
 # ============================
-# LOAD ORDERS
+# LOAD ORDERS FROM REPOSITORY
 # ============================
 
-orders_df = None
+orders_files = os.listdir("data/orders")
 
-if orders_file is not None:
+orders_list = []
 
-    orders_df = pd.read_csv(orders_file)
+for file in orders_files:
 
-    # Clean column names (removes hidden spaces)
-    orders_df.columns = orders_df.columns.str.strip()
+    path = f"data/orders/{file}"
 
-    # Convert Effective Date to datetime
-    orders_df["Effective Date"] = pd.to_datetime(
-        orders_df["Effective Date"]
+    df = pd.read_csv(path)
+
+    df.columns = df.columns.str.strip()
+
+    df["Effective Date"] = pd.to_datetime(
+        df["Effective Date"],
+        errors="coerce"
     )
 
+    orders_list.append(df)
+
+if len(orders_list) > 0:
+    orders_df = pd.concat(orders_list, ignore_index=True)
     orders_df["Upload_Time"] = datetime.now()
+else:
+    orders_df = None
 
 # ============================
 # LONGEVITY ORDER ARCHIVE
