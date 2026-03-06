@@ -85,7 +85,7 @@ def irregularity_summary(merged_df, soi_df, orders_df):
             order_not_paid_count
         )
 
-def executive_dashboard(summary_df, merged_df):
+def executive_dashboard(summary_df, merged_df, cases_df):
 
     import streamlit as st
 
@@ -97,7 +97,7 @@ def executive_dashboard(summary_df, merged_df):
         return
 
     # ============================
-    # COMPUTE METRICS
+    # METRICS
     # ============================
 
     personnel_audited = summary_df["Serial Number"].nunique()
@@ -106,14 +106,18 @@ def executive_dashboard(summary_df, merged_df):
 
     personnel_errors = (summary_df["Months_Incorrect"] > 0).sum()
 
-    overpayment_df = summary_df[summary_df["Total_Overpaid"] > 0]
-    underpayment_df = summary_df[summary_df["Total_Underpaid"] > 0]
+    overpaid_df = summary_df[summary_df["Total_Overpaid"] > 0]
+    underpaid_df = summary_df[summary_df["Total_Underpaid"] > 0]
 
-    personnel_overpaid = overpayment_df.shape[0]
-    personnel_underpaid = underpayment_df.shape[0]
+    personnel_overpaid = overpaid_df.shape[0]
+    personnel_underpaid = underpaid_df.shape[0]
 
     total_overpayment = summary_df["Total_Overpaid"].sum()
     total_underpayment = summary_df["Total_Underpaid"].sum()
+
+    investigation_cases = cases_df.shape[0] if cases_df is not None else 0
+
+    audit_coverage = merged_df["Payroll Month"].nunique()
 
     # ============================
     # ROW 1
@@ -122,36 +126,16 @@ def executive_dashboard(summary_df, merged_df):
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        if st.button(
-            f"Personnel Audited\n\n{personnel_audited}",
-            key="personnel_audited",
-            use_container_width=True
-        ):
+        if st.button(f"Personnel Audited\n\n{personnel_audited}", use_container_width=True):
             st.session_state.view = "personnel"
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        if st.button(
-            f"Payroll Records\n\n{payroll_records}",
-            key="payroll_records",
-            use_container_width=True
-        ):
+        if st.button(f"Payroll Records\n\n{payroll_records}", use_container_width=True):
             st.session_state.view = "payroll"
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col3:
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        if st.button(
-            f"Personnel with Errors\n\n{personnel_errors}",
-            key="personnel_errors",
-            use_container_width=True
-        ):
+        if st.button(f"Personnel with Errors\n\n{personnel_errors}", use_container_width=True):
             st.session_state.view = "errors"
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
 
     # ============================
     # ROW 2
@@ -160,25 +144,15 @@ def executive_dashboard(summary_df, merged_df):
     col4, col5, col6 = st.columns(3)
 
     with col4:
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        if st.button(
-            f"Personnel with Overpayment\n\n{personnel_overpaid}",
-            key="personnel_overpayment",
-            use_container_width=True
-        ):
+        if st.button(f"Personnel Overpaid\n\n{personnel_overpaid}", use_container_width=True):
             st.session_state.view = "overpayment"
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with col5:
-        st.metric(
-            "Total Overpayment",
-            f"₱{total_overpayment:,.2f}"
-        )
+        if st.button(f"Personnel Underpaid\n\n{personnel_underpaid}", use_container_width=True):
+            st.session_state.view = "underpayment"
 
     with col6:
-        st.empty()
-
-    st.markdown("<br>", unsafe_allow_html=True)
+        st.metric("Audit Coverage (Months)", audit_coverage)
 
     # ============================
     # ROW 3
@@ -187,24 +161,14 @@ def executive_dashboard(summary_df, merged_df):
     col7, col8, col9 = st.columns(3)
 
     with col7:
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        if st.button(
-            f"Personnel with Underpayment\n\n{personnel_underpaid}",
-            key="personnel_underpayment",
-            use_container_width=True
-        ):
-            st.session_state.view = "underpayment"
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.metric("Total Overpayment", f"₱{total_overpayment:,.2f}")
 
     with col8:
-        st.metric(
-            "Total Underpayment",
-            f"₱{total_underpayment:,.2f}"
-        )
+        st.metric("Total Underpayment", f"₱{total_underpayment:,.2f}")
 
     with col9:
-        st.empty()
-
+        if st.button(f"Investigation Cases\n\n{investigation_cases}", use_container_width=True):
+            st.session_state.view = "cases"
 
 # ============================
 # RANK DISCREPANCY SUMMARY
