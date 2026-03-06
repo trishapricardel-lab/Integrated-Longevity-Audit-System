@@ -234,7 +234,9 @@ if cases_df is not None:
 
     st.header("📁 Case Tracking")
 
-    st.dataframe(cases_df)
+    st.dataframe(
+        cases_df.sort_values("Amount", ascending=False)
+    )
 
 # ----------------------------
 
