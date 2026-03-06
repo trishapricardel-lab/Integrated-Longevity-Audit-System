@@ -234,7 +234,7 @@ if merged_df is not None:
 
 if summary_df is not None and merged_df is not None:
 
-    executive_dashboard(summary_df, merged_df)
+    executive_dashboard(summary_df, merged_df, cases_df)
 
 # ============================
 # DATA VIEW (DRILL DOWN)
@@ -259,6 +259,9 @@ if "view" in st.session_state:
 
     elif st.session_state.view == "underpayment":
         st.dataframe(summary_df[summary_df["Total_Underpaid"] > 0])
+        
+    elif st.session_state.view == "cases":
+    st.dataframe(cases_df)
 
 # ----------------------------
 
