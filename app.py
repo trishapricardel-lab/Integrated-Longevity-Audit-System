@@ -287,7 +287,7 @@ if merged_df is not None:
 
 if summary_df is not None:
 
-    # organizational_summary(summary_df)
+    pass
 
 # ----------------------------
 
