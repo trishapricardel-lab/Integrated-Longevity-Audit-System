@@ -162,13 +162,13 @@ def executive_dashboard(summary_df, merged_df, cases_df):
     col7, col8, col9 = st.columns(3)
 
     with col7:
-        st.button(
+        st.metric(
             f"Total Overpayment\n\n:red[₱{total_overpayment:,.2f}]",
             use_container_width=True
         )
 
     with col8:
-        st.button(
+        st.metric(
             f"""
             <div style="text-align:center;
                         border:1px solid #2c3e50;
@@ -185,7 +185,7 @@ def executive_dashboard(summary_df, merged_df, cases_df):
         )
 
     with col9:
-        st.button("Audit Coverage (Months)", audit_coverage)
+        st.metric("Audit Coverage (Months)", audit_coverage)
         
 
 # ============================
