@@ -236,6 +236,8 @@ if summary_df is not None and merged_df is not None:
 
     executive_dashboard(summary_df, merged_df, cases_df)
 
+# ----------------------------
+
 # ============================
 # DATA VIEW (DRILL DOWN)
 # ============================
