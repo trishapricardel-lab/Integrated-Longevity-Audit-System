@@ -180,7 +180,17 @@ if len(orders_list) > 0:
 # PROCESSING
 # ============================
 
-if soi_file is not None and payroll_files:
+st.markdown("### ⚙️ Run Audit Analysis")
+
+if st.button("🚀 Generate Audit Analysis"):
+
+    if not soi_files:
+        st.error("Please upload or select SOI files.")
+        st.stop()
+
+    if not payroll_files:
+        st.error("Please upload or select payroll files.")
+        st.stop()
 
     try:
 
@@ -209,6 +219,8 @@ if soi_file is not None and payroll_files:
         mismatch_df = detect_mismatch(merged_df)
 
         cases_df = generate_cases(mismatch_df)
+
+        st.success("Audit analysis completed successfully.")
 
     except Exception as e:
 
