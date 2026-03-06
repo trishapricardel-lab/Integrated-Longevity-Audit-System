@@ -1,20 +1,46 @@
 import pandas as pd
 from datetime import datetime
 
+
+# ============================
+# GENERATE CASES
+# ============================
+
 def generate_cases(mismatches):
+
+    if mismatches is None or mismatches.empty:
+        return pd.DataFrame()
 
     cases = []
 
-    for i, row in mismatches.iterrows():
+    for _, row in mismatches.iterrows():
+
+        serial = row["Serial Number"]
+        diff = row["LP_Difference"]
+
+        # Determine issue type
+        if diff > 1:
+            issue = "Incorrect Longevity Pay (Overpayment)"
+            amount = round(diff, 2)
+
+        elif diff < -1:
+            issue = "Incorrect Longevity Pay (Underpayment)"
+            amount = round(abs(diff), 2)
+
+        else:
+            continue
 
         case = {
-            "Case_ID": f"LP-{row['Serial Number']}",
-            "Serial Number": row["Serial Number"],
-            "Issue": "Incorrect Longevity Pay Computation",
+            "Case_ID": f"LP-{serial}",
+            "Serial Number": serial,
+            "Issue": issue,
+            "Amount": amount,
             "Status": "Open",
-            "Date_Detected": datetime.now()
+            "Date Detected": datetime.now().strftime("%Y-%m-%d")
         }
 
         cases.append(case)
 
-    return pd.DataFrame(cases)
+    cases_df = pd.DataFrame(cases)
+
+    return cases_df
