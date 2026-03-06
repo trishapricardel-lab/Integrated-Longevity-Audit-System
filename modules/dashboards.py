@@ -168,7 +168,7 @@ def executive_dashboard(summary_df, merged_df, cases_df):
         )
 
     with col8:
-        st.markdown(
+        st.button(
             f"""
             <div style="text-align:center;
                         border:1px solid #2c3e50;
@@ -185,7 +185,7 @@ def executive_dashboard(summary_df, merged_df, cases_df):
         )
 
     with col9:
-        st.metric("Audit Coverage (Months)", audit_coverage)
+        st.button("Audit Coverage (Months)", audit_coverage)
         
 
 # ============================
