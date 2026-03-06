@@ -16,45 +16,54 @@ def handle_soi_upload(cursor, conn):
         ["Use Existing SOI File", "Upload New SOI File"]
     )
 
-    soi_file = None
+    soi_files = []
 
     if soi_option == "Use Existing SOI File":
 
-        soi_files = os.listdir("data/soi")
+        repo_files = os.listdir("data/soi")
 
-        if len(soi_files) > 0:
+        if len(repo_files) > 0:
 
-            selected_soi = st.selectbox("Select SOI File", soi_files)
+            selected_files = st.multiselect(
+                "Select SOI Files",
+                repo_files
+            )
 
-            soi_file = f"data/soi/{selected_soi}"
+            soi_files = [f"data/soi/{f}" for f in selected_files]
 
         else:
             st.info("No SOI files available in repository.")
 
     else:
 
-        uploaded_soi = st.file_uploader("Upload SOI CSV", type=["csv"])
+        uploaded_soi = st.file_uploader(
+            "Upload SOI CSV Files",
+            type=["csv"],
+            accept_multiple_files=True
+        )
 
-        if uploaded_soi is not None:
+        if uploaded_soi:
 
-            path = f"data/soi/{uploaded_soi.name}"
+            for file in uploaded_soi:
 
-            with open(path, "wb") as f:
-                f.write(uploaded_soi.getbuffer())
+                path = f"data/soi/{file.name}"
 
-            st.success("SOI saved to repository")
+                with open(path, "wb") as f:
+                    f.write(file.getbuffer())
 
-            log_action(
-                cursor,
-                conn,
-                st.session_state.username,
-                "Upload SOI",
-                uploaded_soi.name
-            )
+                log_action(
+                    cursor,
+                    conn,
+                    st.session_state.username,
+                    "Upload SOI",
+                    file.name
+                )
 
-            soi_file = path
+                soi_files.append(path)
 
-    return soi_file
+            st.success("SOI files saved to repository")
+
+    return soi_files
 
 
 # ============================
@@ -70,45 +79,54 @@ def handle_orders_upload(cursor, conn):
         ["Use Existing Orders", "Upload New Orders"]
     )
 
-    orders_file = None
+    orders_files = []
 
     if orders_option == "Use Existing Orders":
 
-        orders_files = os.listdir("data/orders")
+        repo_files = os.listdir("data/orders")
 
-        if len(orders_files) > 0:
+        if len(repo_files) > 0:
 
-            selected_orders = st.selectbox("Select Orders File", orders_files)
+            selected_files = st.multiselect(
+                "Select Orders Files",
+                repo_files
+            )
 
-            orders_file = f"data/orders/{selected_orders}"
+            orders_files = [f"data/orders/{f}" for f in selected_files]
 
         else:
             st.info("No order files available.")
 
     else:
 
-        uploaded_orders = st.file_uploader("Upload Orders CSV", type=["csv"])
+        uploaded_orders = st.file_uploader(
+            "Upload Orders CSV Files",
+            type=["csv"],
+            accept_multiple_files=True
+        )
 
-        if uploaded_orders is not None:
+        if uploaded_orders:
 
-            path = f"data/orders/{uploaded_orders.name}"
+            for file in uploaded_orders:
 
-            with open(path, "wb") as f:
-                f.write(uploaded_orders.getbuffer())
+                path = f"data/orders/{file.name}"
 
-            st.success("Orders saved")
+                with open(path, "wb") as f:
+                    f.write(file.getbuffer())
 
-            log_action(
-                cursor,
-                conn,
-                st.session_state.username,
-                "Upload Orders",
-                uploaded_orders.name
-            )
+                log_action(
+                    cursor,
+                    conn,
+                    st.session_state.username,
+                    "Upload Orders",
+                    file.name
+                )
 
-            orders_file = path
+                orders_files.append(path)
 
-    return orders_file
+            st.success("Orders saved to repository")
+
+    return orders_files
 
 
 # ============================
