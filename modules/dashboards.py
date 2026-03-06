@@ -60,33 +60,25 @@ def irregularity_summary(merged_df, soi_df, orders_df):
     col1, col2 = st.columns(2)
 
     with col1:
-        st.metric(
-            "Incorrect Longevity Pay Computation",
-            incorrect_count
-        )
+        st.metric("Incorrect Longevity Pay Computation", incorrect_count)
 
     with col2:
-        st.metric(
-            "Longevity Pay Without Official Order",
-            lp_without_order_count
-        )
+        st.metric("Longevity Pay Without Official Order", lp_without_order_count)
 
     col3, col4 = st.columns(2)
 
     with col3:
-        st.metric(
-            "Eligible Personnel Without Longevity Order",
-            missing_orders_count
-        )
+        st.metric("Eligible Personnel Without Longevity Order", missing_orders_count)
 
     with col4:
-        st.metric(
-            "Order Issued but Payroll Not Updated",
-            order_not_paid_count
-        )
+        st.metric("Order Issued but Payroll Not Updated", order_not_paid_count)
+
+
+# ============================
+# EXECUTIVE DASHBOARD
+# ============================
 
 def executive_dashboard(summary_df, merged_df, cases_df):
-    import streamlit as st
 
     st.markdown("---")
     st.header("📊 Executive Financial Dashboard")
@@ -95,26 +87,29 @@ def executive_dashboard(summary_df, merged_df, cases_df):
         st.info("Upload files to generate dashboard.")
         return
 
-    # ============================
-    # METRICS
-    # ============================
-
     personnel_audited = summary_df["Serial Number"].nunique()
-
     payroll_records = merged_df.shape[0]
 
-    personnel_errors = cases_df["Serial Number"].nunique() if cases_df is not None else 0
+    if cases_df is not None:
 
-    overpaid_df = cases_df[cases_df["Issue"] == "Overpayment"]
-    underpaid_df = cases_df[cases_df["Issue"] == "Underpayment"]
-    
-    personnel_overpaid = overpaid_df["Serial Number"].nunique() if cases_df is not None else 0
-    personnel_underpaid = underpaid_df["Serial Number"].nunique() if cases_df is not None else 0]
+        personnel_errors = cases_df["Serial Number"].nunique()
+
+        overpaid_df = cases_df[cases_df["Issue"] == "Overpayment"]
+        underpaid_df = cases_df[cases_df["Issue"] == "Underpayment"]
+
+        personnel_overpaid = overpaid_df["Serial Number"].nunique()
+        personnel_underpaid = underpaid_df["Serial Number"].nunique()
+
+        investigation_cases = cases_df.shape[0]
+
+    else:
+        personnel_errors = 0
+        personnel_overpaid = 0
+        personnel_underpaid = 0
+        investigation_cases = 0
 
     total_overpayment = summary_df["Total_Overpaid"].sum()
     total_underpayment = summary_df["Total_Underpaid"].sum()
-
-    investigation_cases = cases_df.shape[0] if cases_df is not None else 0
 
     audit_coverage = merged_df["Payroll Month"].nunique()
 
@@ -125,16 +120,13 @@ def executive_dashboard(summary_df, merged_df, cases_df):
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        if st.button(f"Personnel Audited\n\n{personnel_audited}", use_container_width=True):
-            st.session_state.view = "personnel"
+        st.metric("Personnel Audited", personnel_audited)
 
     with col2:
-        if st.button(f"Payroll Records\n\n{payroll_records}", use_container_width=True):
-            st.session_state.view = "payroll"
+        st.metric("Payroll Records", payroll_records)
 
     with col3:
-        if st.button(f"Personnel with Errors\n\n{personnel_errors}", use_container_width=True):
-            st.session_state.view = "errors"
+        st.metric("Personnel with Errors", personnel_errors)
 
     # ============================
     # ROW 2
@@ -143,16 +135,13 @@ def executive_dashboard(summary_df, merged_df, cases_df):
     col4, col5, col6 = st.columns(3)
 
     with col4:
-        if st.button(f"Personnel Overpaid\n\n{personnel_overpaid}", use_container_width=True):
-            st.session_state.view = "overpayment"
+        st.metric("Personnel Overpaid", personnel_overpaid)
 
     with col5:
-        if st.button(f"Personnel Underpaid\n\n{personnel_underpaid}", use_container_width=True):
-            st.session_state.view = "underpayment"
+        st.metric("Personnel Underpaid", personnel_underpaid)
 
     with col6:
-        if st.button(f"Investigation Cases\n\n{investigation_cases}", use_container_width=True):
-            st.session_state.view = "cases"
+        st.metric("Investigation Cases", investigation_cases)
 
     # ============================
     # ROW 3
@@ -196,10 +185,10 @@ def executive_dashboard(summary_df, merged_df, cases_df):
 
     with col9:
         st.metric("Audit Coverage (Months)", audit_coverage)
-        
+
 
 # ============================
-# RANK DISCREPANCY SUMMARY
+# RANK SUMMARY
 # ============================
 
 def rank_summary(merged_df):
@@ -211,14 +200,14 @@ def rank_summary(merged_df):
         st.info("Upload files to generate rank discrepancy summary.")
         return
 
-    rank_summary = merged_df.groupby("Rank").agg(
+    rank_table = merged_df.groupby("Rank").agg(
         Personnel=("Serial Number", "nunique"),
         With_Error=("Error_Flag", "sum"),
         Overpaid=("LP_Difference", lambda x: x[x > 0].sum()),
         Underpaid=("LP_Difference", lambda x: abs(x[x < 0].sum()))
     ).reset_index()
 
-    st.dataframe(rank_summary)
+    st.dataframe(rank_table)
 
 
 # ============================
