@@ -162,10 +162,27 @@ def executive_dashboard(summary_df, merged_df, cases_df):
     col7, col8, col9 = st.columns(3)
 
     with col7:
-        st.metric("Total Overpayment", f"₱{total_overpayment:,.2f}")
+        st.button(
+            f"Total Overpayment\n\n:red[₱{total_overpayment:,.2f}]",
+            use_container_width=True
+        )
 
     with col8:
-        st.metric("Total Underpayment", f"₱{total_underpayment:,.2f}")
+        st.markdown(
+            f"""
+            <div style="text-align:center;
+                        border:1px solid #2c3e50;
+                        border-radius:12px;
+                        padding:20px;
+                        background-color:#0f1c2e">
+                <div style="font-size:16px;">Total Underpayment</div>
+                <div style="font-size:32px; font-weight:700; color:orange;">
+                    ₱{total_underpayment:,.2f}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     with col9:
         st.metric("Audit Coverage (Months)", audit_coverage)
