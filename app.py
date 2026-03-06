@@ -263,7 +263,7 @@ if "view" in st.session_state:
         st.dataframe(summary_df[summary_df["Total_Underpaid"] > 0])
         
     elif st.session_state.view == "cases":
-    st.dataframe(cases_df)
+        st.dataframe(cases_df)
 
 # ----------------------------
 
