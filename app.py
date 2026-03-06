@@ -139,9 +139,9 @@ admin_controls(cursor, conn)
 
 st.header("📤 Upload Required Files")
 
-soi_file = handle_soi_upload(cursor, conn)
+soi_files = handle_soi_upload(cursor, conn)
 
-orders_file = handle_orders_upload(cursor, conn)
+orders_files = handle_orders_upload(cursor, conn)
 
 payroll_files = handle_payroll_upload(cursor, conn)
 
